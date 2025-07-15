@@ -1,4 +1,4 @@
-module gitlab.com/manab-group/nebulo
+module github.com/manab-pr/nebulo
 
 go 1.23.2
 
@@ -6,7 +6,7 @@ require (
 	github.com/gin-gonic/gin v1.10.1
 	github.com/jinzhu/gorm v1.9.16
 	github.com/joho/godotenv v1.5.1
-)
+	)
 
 require (
 	github.com/bytedance/sonic v1.11.6 // indirect
@@ -43,5 +43,6 @@ require (
 	google.golang.org/protobuf v1.34.1 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	gorm.io/driver/postgres v1.6.0 // indirect
+	gorm.io/gorm v1.30.0 // indirect
 	gorm.io/gorm v1.30.0 // indirect
 )
