@@ -144,7 +144,6 @@ jobs:
     
     - name: Log in to Docker Hub
       uses: docker/login-action@v3
-      if: ${{ secrets.DOCKER_USERNAME != '' }}
       with:
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
@@ -164,7 +163,6 @@ jobs:
     
     - name: Build and push main server image
       uses: docker/build-push-action@v5
-      if: ${{ secrets.DOCKER_USERNAME != '' }}
       with:
         context: .
         file: ./Dockerfile
@@ -176,7 +174,6 @@ jobs:
     
     - name: Build and push device server image
       uses: docker/build-push-action@v5
-      if: ${{ secrets.DOCKER_USERNAME != '' }}
       with:
         context: .
         file: ./Dockerfile.device
