@@ -8,8 +8,6 @@ import (
 
 func SetupStorageRoutes(router *gin.RouterGroup, handler *handlers.StorageHandler) {
 	storage := router.Group("/storage")
-	{
-		storage.GET("/summary", handler.GetStorageSummary)
-		storage.GET("/device/:deviceId", handler.GetDeviceStorage)
-	}
+	storage.GET("/summary", handler.GetStorageSummary)
+	storage.GET("/device/:deviceId", handler.GetDeviceStorage)
 }

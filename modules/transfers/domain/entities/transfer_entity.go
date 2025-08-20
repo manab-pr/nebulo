@@ -7,18 +7,18 @@ import (
 )
 
 type Transfer struct {
-	ID         primitive.ObjectID `bson:"_id,omitempty"`
-	FileID     primitive.ObjectID `bson:"file_id"`
-	DeviceID   primitive.ObjectID `bson:"device_id"`
-	Status     TransferStatus     `bson:"status"`
-	Priority   int                `bson:"priority"`
-	Retries    int                `bson:"retries"`
-	MaxRetries int                `bson:"max_retries"`
-	CreatedAt  time.Time          `bson:"created_at"`
-	UpdatedAt  time.Time          `bson:"updated_at"`
-	StartedAt  *time.Time         `bson:"started_at,omitempty"`
-	CompletedAt *time.Time        `bson:"completed_at,omitempty"`
-	ErrorMsg   string             `bson:"error_msg,omitempty"`
+	ID          primitive.ObjectID `bson:"_id,omitempty"`
+	FileID      primitive.ObjectID `bson:"file_id"`
+	DeviceID    primitive.ObjectID `bson:"device_id"`
+	Status      TransferStatus     `bson:"status"`
+	Priority    int                `bson:"priority"`
+	Retries     int                `bson:"retries"`
+	MaxRetries  int                `bson:"max_retries"`
+	CreatedAt   time.Time          `bson:"created_at"`
+	UpdatedAt   time.Time          `bson:"updated_at"`
+	StartedAt   *time.Time         `bson:"started_at,omitempty"`
+	CompletedAt *time.Time         `bson:"completed_at,omitempty"`
+	ErrorMsg    string             `bson:"error_msg,omitempty"`
 }
 
 type TransferStatus string
@@ -28,7 +28,7 @@ const (
 	TransferStatusInProgress TransferStatus = "in_progress"
 	TransferStatusCompleted  TransferStatus = "completed"
 	TransferStatusFailed     TransferStatus = "failed"
-	TransferStatusCancelled  TransferStatus = "cancelled"
+	TransferStatusCanceled   TransferStatus = "canceled"
 )
 
 type CompleteTransferRequest struct {

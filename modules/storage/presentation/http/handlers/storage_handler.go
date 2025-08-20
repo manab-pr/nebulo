@@ -9,7 +9,7 @@ import (
 )
 
 type StorageHandler struct {
-	summaryUseCase     *usecases.GetStorageSummaryUseCase
+	summaryUseCase       *usecases.GetStorageSummaryUseCase
 	deviceStorageUseCase *usecases.GetDeviceStorageUseCase
 }
 

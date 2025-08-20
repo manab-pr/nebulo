@@ -2,9 +2,9 @@ package container
 
 import (
 	deviceRepo "github.com/manab-pr/nebulo/modules/devices/data/mongodb/repository"
+	deviceRepository "github.com/manab-pr/nebulo/modules/devices/domain/repository"
 	deviceUseCases "github.com/manab-pr/nebulo/modules/devices/domain/usecases"
 	deviceHandlers "github.com/manab-pr/nebulo/modules/devices/presentation/http/handlers"
-	deviceRepository "github.com/manab-pr/nebulo/modules/devices/domain/repository"
 
 	"go.mongodb.org/mongo-driver/mongo"
 )

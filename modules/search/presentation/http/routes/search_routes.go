@@ -8,8 +8,6 @@ import (
 
 func SetupSearchRoutes(router *gin.RouterGroup, handler *handlers.SearchHandler) {
 	files := router.Group("/files")
-	{
-		files.GET("/search", handler.SearchFiles)
-		files.GET("/location/:fileId", handler.GetFileLocation)
-	}
+	files.GET("/search", handler.SearchFiles)
+	files.GET("/location/:fileId", handler.GetFileLocation)
 }

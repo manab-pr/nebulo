@@ -14,7 +14,11 @@ func main() {
 
 	// Initialize logger
 	logger := config.InitLogger(cfg.Server.Env)
-	defer logger.Sync()
+	defer func() {
+		if err := logger.Sync(); err != nil {
+			log.Printf("Failed to sync logger: %v", err)
+		}
+	}()
 
 	// Connect to MongoDB
 	db, err := config.ConnectMongoDB(cfg)
@@ -36,5 +40,7 @@ func main() {
 	srv.SetupRoutes()
 
 	// Start server
-	log.Fatal(srv.Run())
+	if err := srv.Run(); err != nil {
+		logger.Sugar().Fatalf("Server failed to start: %v", err)
+	}
 }

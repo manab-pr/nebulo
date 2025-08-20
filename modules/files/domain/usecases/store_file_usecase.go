@@ -2,13 +2,13 @@ package usecases
 
 import (
 	"context"
-	"crypto/md5"
+	"crypto/sha256"
 	"errors"
 	"fmt"
 	"time"
 
-	"github.com/manab-pr/nebulo/modules/devices/domain/repository"
 	deviceEntities "github.com/manab-pr/nebulo/modules/devices/domain/entities"
+	"github.com/manab-pr/nebulo/modules/devices/domain/repository"
 	"github.com/manab-pr/nebulo/modules/files/domain/entities"
 	fileRepository "github.com/manab-pr/nebulo/modules/files/domain/repository"
 
@@ -35,8 +35,8 @@ func (uc *StoreFileUseCase) Execute(ctx context.Context, req entities.StoreFileR
 	// Select target device
 	if req.TargetDevice != "" {
 		// Use specific device
-		deviceID, err := primitive.ObjectIDFromHex(req.TargetDevice)
-		if err != nil {
+		deviceID, parseErr := primitive.ObjectIDFromHex(req.TargetDevice)
+		if parseErr != nil {
 			return nil, errors.New("invalid target device ID")
 		}
 		selectedDevice, err = uc.deviceRepo.GetByID(ctx, deviceID)
@@ -48,9 +48,9 @@ func (uc *StoreFileUseCase) Execute(ctx context.Context, req entities.StoreFileR
 		}
 	} else {
 		// Find an online device with sufficient space
-		onlineDevices, err := uc.deviceRepo.GetOnlineDevices(ctx)
-		if err != nil {
-			return nil, err
+		onlineDevices, deviceErr := uc.deviceRepo.GetOnlineDevices(ctx)
+		if deviceErr != nil {
+			return nil, deviceErr
 		}
 		if len(onlineDevices) == 0 {
 			return nil, errors.New("no online devices available")
@@ -71,7 +71,7 @@ func (uc *StoreFileUseCase) Execute(ctx context.Context, req entities.StoreFileR
 	// Generate unique filename and checksum
 	uniqueID := uuid.New().String()
 	fileName := fmt.Sprintf("%s_%s", uniqueID, req.Name)
-	checksum := fmt.Sprintf("%x", md5.Sum(fileData))
+	checksum := fmt.Sprintf("%x", sha256.Sum256(fileData))
 
 	// Create file record
 	file := &entities.File{

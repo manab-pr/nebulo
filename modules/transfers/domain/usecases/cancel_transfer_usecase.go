@@ -42,7 +42,7 @@ func (uc *CancelTransferUseCase) Execute(ctx context.Context, transferID string)
 	}
 
 	// Cancel the transfer
-	err = uc.transferRepo.UpdateStatus(ctx, id, entities.TransferStatusCancelled)
+	err = uc.transferRepo.UpdateStatus(ctx, id, entities.TransferStatusCanceled)
 	if err != nil {
 		return err
 	}

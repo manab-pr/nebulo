@@ -63,8 +63,8 @@ func (h *FileHandler) StoreFile(c *gin.Context) {
 		TargetDevice: c.PostForm("target_device"),
 	}
 
-	if err := h.validator.Struct(req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	if validationErr := h.validator.Struct(req); validationErr != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": validationErr.Error()})
 		return
 	}
 

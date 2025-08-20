@@ -8,9 +8,9 @@ import (
 )
 
 type SearchContainer struct {
-	SearchFilesUseCase    *searchUseCases.SearchFilesUseCase
-	GetLocationUseCase    *searchUseCases.GetFileLocationUseCase
-	Handler               *searchHandlers.SearchHandler
+	SearchFilesUseCase *searchUseCases.SearchFilesUseCase
+	GetLocationUseCase *searchUseCases.GetFileLocationUseCase
+	Handler            *searchHandlers.SearchHandler
 }
 
 func NewSearchContainer(fileRepo fileRepo.FileRepository, deviceRepo deviceRepo.DeviceRepository) *SearchContainer {

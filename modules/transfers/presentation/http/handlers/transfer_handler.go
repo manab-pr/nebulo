@@ -90,6 +90,6 @@ func (h *TransferHandler) CancelTransfer(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"message": "Transfer cancelled successfully",
+		"message": "Transfer canceled successfully",
 	})
 }

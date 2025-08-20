@@ -24,7 +24,7 @@ func NewMongoDeviceRepository(db *mongo.Database) *MongoDeviceRepository {
 
 func (r *MongoDeviceRepository) Create(ctx context.Context, device *entities.Device) (*entities.Device, error) {
 	deviceModel := model.FromEntity(device)
-	
+
 	result, err := r.collection.InsertOne(ctx, deviceModel)
 	if err != nil {
 		return nil, err
@@ -36,7 +36,7 @@ func (r *MongoDeviceRepository) Create(ctx context.Context, device *entities.Dev
 
 func (r *MongoDeviceRepository) GetByID(ctx context.Context, id primitive.ObjectID) (*entities.Device, error) {
 	var deviceModel model.DeviceModel
-	
+
 	err := r.collection.FindOne(ctx, bson.M{"_id": id}).Decode(&deviceModel)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
@@ -50,7 +50,7 @@ func (r *MongoDeviceRepository) GetByID(ctx context.Context, id primitive.Object
 
 func (r *MongoDeviceRepository) GetByIPAddress(ctx context.Context, ipAddress string) (*entities.Device, error) {
 	var deviceModel model.DeviceModel
-	
+
 	err := r.collection.FindOne(ctx, bson.M{"ip_address": ipAddress}).Decode(&deviceModel)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {

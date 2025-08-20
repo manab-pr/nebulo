@@ -48,7 +48,7 @@ func (h *InternalDeviceHandler) StoreFile(c *gin.Context) {
 	if fileName == "" {
 		fileName = header.Filename
 	}
-	
+
 	dst, err := os.Create(filepath.Join(h.storagePath, fileName))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create file"})

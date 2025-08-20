@@ -2,12 +2,12 @@ package server
 
 import (
 	"github.com/manab-pr/nebulo/config"
+	"github.com/manab-pr/nebulo/container"
 	deviceRoutes "github.com/manab-pr/nebulo/modules/devices/presentation/http/routes"
 	fileRoutes "github.com/manab-pr/nebulo/modules/files/presentation/http/routes"
 	searchRoutes "github.com/manab-pr/nebulo/modules/search/presentation/http/routes"
 	storageRoutes "github.com/manab-pr/nebulo/modules/storage/presentation/http/routes"
 	transferRoutes "github.com/manab-pr/nebulo/modules/transfers/presentation/http/routes"
-	"github.com/manab-pr/nebulo/container"
 
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
@@ -51,14 +51,12 @@ func (s *Server) SetupRoutes() {
 
 	// API v1 routes
 	v1 := s.router.Group("/api/v1")
-	{
-		// Setup module routes
-		deviceRoutes.SetupDeviceRoutes(v1, s.container.DeviceHandler)
-		fileRoutes.SetupFileRoutes(v1, s.container.FileHandler)
-		transferRoutes.SetupTransferRoutes(v1, s.container.TransferHandler)
-		storageRoutes.SetupStorageRoutes(v1, s.container.StorageHandler)
-		searchRoutes.SetupSearchRoutes(v1, s.container.SearchHandler)
-	}
+	// Setup module routes
+	deviceRoutes.SetupDeviceRoutes(v1, s.container.DeviceHandler)
+	fileRoutes.SetupFileRoutes(v1, s.container.FileHandler)
+	transferRoutes.SetupTransferRoutes(v1, s.container.TransferHandler)
+	storageRoutes.SetupStorageRoutes(v1, s.container.StorageHandler)
+	searchRoutes.SetupSearchRoutes(v1, s.container.SearchHandler)
 }
 
 func (s *Server) Run() error {

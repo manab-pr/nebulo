@@ -10,8 +10,8 @@ import (
 )
 
 type SearchHandler struct {
-	searchFilesUseCase    *usecases.SearchFilesUseCase
-	getLocationUseCase    *usecases.GetFileLocationUseCase
+	searchFilesUseCase *usecases.SearchFilesUseCase
+	getLocationUseCase *usecases.GetFileLocationUseCase
 }
 
 func NewSearchHandler(

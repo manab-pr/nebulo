@@ -4,8 +4,8 @@ import (
 	"context"
 	"strings"
 
-	fileRepo "github.com/manab-pr/nebulo/modules/files/domain/repository"
 	fileEntities "github.com/manab-pr/nebulo/modules/files/domain/entities"
+	fileRepo "github.com/manab-pr/nebulo/modules/files/domain/repository"
 )
 
 type SearchFilesUseCase struct {

@@ -25,7 +25,7 @@ func NewMongoTransferRepository(db *mongo.Database) *MongoTransferRepository {
 
 func (r *MongoTransferRepository) Create(ctx context.Context, transfer *entities.Transfer) (*entities.Transfer, error) {
 	transferModel := model.FromEntity(transfer)
-	
+
 	result, err := r.collection.InsertOne(ctx, transferModel)
 	if err != nil {
 		return nil, err
@@ -37,7 +37,7 @@ func (r *MongoTransferRepository) Create(ctx context.Context, transfer *entities
 
 func (r *MongoTransferRepository) GetByID(ctx context.Context, id primitive.ObjectID) (*entities.Transfer, error) {
 	var transferModel model.TransferModel
-	
+
 	err := r.collection.FindOne(ctx, bson.M{"_id": id}).Decode(&transferModel)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
@@ -56,7 +56,7 @@ func (r *MongoTransferRepository) GetPendingByDeviceID(ctx context.Context, devi
 	}
 
 	opts := options.Find().SetSort(bson.D{
-		{Key: "priority", Value: -1}, // Higher priority first
+		{Key: "priority", Value: -1},  // Higher priority first
 		{Key: "created_at", Value: 1}, // Older first within same priority
 	})
 

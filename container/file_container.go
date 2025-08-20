@@ -3,19 +3,19 @@ package container
 import (
 	deviceRepo "github.com/manab-pr/nebulo/modules/devices/domain/repository"
 	fileRepo "github.com/manab-pr/nebulo/modules/files/data/mongodb/repository"
+	fileRepository "github.com/manab-pr/nebulo/modules/files/domain/repository"
 	fileUseCases "github.com/manab-pr/nebulo/modules/files/domain/usecases"
 	fileHandlers "github.com/manab-pr/nebulo/modules/files/presentation/http/handlers"
-	fileRepository "github.com/manab-pr/nebulo/modules/files/domain/repository"
 
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type FileContainer struct {
-	Repository      fileRepository.FileRepository
-	StoreUseCase    *fileUseCases.StoreFileUseCase
-	GetUseCase      *fileUseCases.GetFileUseCase
-	DeleteUseCase   *fileUseCases.DeleteFileUseCase
-	Handler         *fileHandlers.FileHandler
+	Repository    fileRepository.FileRepository
+	StoreUseCase  *fileUseCases.StoreFileUseCase
+	GetUseCase    *fileUseCases.GetFileUseCase
+	DeleteUseCase *fileUseCases.DeleteFileUseCase
+	Handler       *fileHandlers.FileHandler
 }
 
 func NewFileContainer(db *mongo.Database) *FileContainer {

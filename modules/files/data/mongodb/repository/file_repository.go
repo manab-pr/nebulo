@@ -24,7 +24,7 @@ func NewMongoFileRepository(db *mongo.Database) *MongoFileRepository {
 
 func (r *MongoFileRepository) Create(ctx context.Context, file *entities.File) (*entities.File, error) {
 	fileModel := model.FromEntity(file)
-	
+
 	result, err := r.collection.InsertOne(ctx, fileModel)
 	if err != nil {
 		return nil, err
@@ -36,7 +36,7 @@ func (r *MongoFileRepository) Create(ctx context.Context, file *entities.File) (
 
 func (r *MongoFileRepository) GetByID(ctx context.Context, id primitive.ObjectID) (*entities.File, error) {
 	var fileModel model.FileModel
-	
+
 	err := r.collection.FindOne(ctx, bson.M{"_id": id}).Decode(&fileModel)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {

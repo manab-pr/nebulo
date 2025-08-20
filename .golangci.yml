@@ -1,4 +1,20 @@
 linters-settings:
+  depguard:
+    rules:
+      main:
+        deny:
+          - pkg: "github.com/sirupsen/logrus"
+            desc: "logging is allowed only by logutils.Log"
+        allow:
+          - $gostd
+          - github.com/manab-pr/nebulo
+          - github.com/joho/godotenv
+          - go.uber.org/zap
+          - go.mongodb.org/mongo-driver
+          - github.com/go-redis/redis/v8
+          - github.com/gin-gonic/gin
+          - github.com/go-playground/validator/v10
+          - github.com/google/uuid
   dupl:
     threshold: 100
   exhaustive:

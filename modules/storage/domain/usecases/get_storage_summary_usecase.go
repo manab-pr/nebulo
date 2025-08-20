@@ -3,8 +3,8 @@ package usecases
 import (
 	"context"
 
-	deviceRepo "github.com/manab-pr/nebulo/modules/devices/domain/repository"
 	deviceEntities "github.com/manab-pr/nebulo/modules/devices/domain/entities"
+	deviceRepo "github.com/manab-pr/nebulo/modules/devices/domain/repository"
 	fileRepo "github.com/manab-pr/nebulo/modules/files/domain/repository"
 	"github.com/manab-pr/nebulo/modules/storage/domain/entities"
 )

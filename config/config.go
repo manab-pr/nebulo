@@ -10,12 +10,12 @@ import (
 )
 
 type Config struct {
-	Server    ServerConfig
-	Database  DatabaseConfig
-	Redis     RedisConfig
-	JWT       JWTConfig
-	Storage   StorageConfig
-	Device    DeviceConfig
+	Server   ServerConfig
+	Database DatabaseConfig
+	Redis    RedisConfig
+	JWT      JWTConfig
+	Storage  StorageConfig
+	Device   DeviceConfig
 }
 
 type ServerConfig struct {
@@ -60,7 +60,7 @@ func LoadConfig() *Config {
 	jwtExpiresIn, _ := time.ParseDuration(getEnv("JWT_EXPIRES_IN", "24h"))
 	heartbeatInterval, _ := time.ParseDuration(getEnv("HEARTBEAT_INTERVAL", "30s"))
 	transferTimeout, _ := time.ParseDuration(getEnv("TRANSFER_TIMEOUT", "300s"))
-	
+
 	maxFileSize := parseFileSize(getEnv("MAX_FILE_SIZE", "100MB"))
 
 	return &Config{
@@ -106,14 +106,14 @@ func parseFileSize(sizeStr string) int64 {
 	if len(sizeStr) < 3 {
 		return 100 * 1024 * 1024 // Default 100MB
 	}
-	
+
 	unit := sizeStr[len(sizeStr)-2:]
 	sizeNumStr := sizeStr[:len(sizeStr)-2]
 	sizeNum, err := strconv.ParseInt(sizeNumStr, 10, 64)
 	if err != nil {
 		return 100 * 1024 * 1024 // Default 100MB
 	}
-	
+
 	switch unit {
 	case "KB":
 		return sizeNum * 1024

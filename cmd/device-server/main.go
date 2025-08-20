@@ -16,7 +16,11 @@ func main() {
 
 	// Initialize logger
 	logger := config.InitLogger(cfg.Server.Env)
-	defer logger.Sync()
+	defer func() {
+		if err := logger.Sync(); err != nil {
+			log.Printf("Failed to sync logger: %v", err)
+		}
+	}()
 
 	// Set gin mode
 	if cfg.Server.Env == "production" {
@@ -34,5 +38,7 @@ func main() {
 
 	// Start device server
 	logger.Sugar().Infof("Starting device server on port %s", cfg.Device.ServerPort)
-	log.Fatal(router.Run(":" + cfg.Device.ServerPort))
+	if err := router.Run(":" + cfg.Device.ServerPort); err != nil {
+		logger.Sugar().Fatalf("Device server failed to start: %v", err)
+	}
 }
