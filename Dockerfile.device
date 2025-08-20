@@ -1,4 +1,4 @@
-# Multi-stage build for main server
+# Multi-stage build for device server
 FROM golang:1.23-alpine AS builder
 
 WORKDIR /app
@@ -15,8 +15,8 @@ RUN go mod download
 # Copy source code
 COPY . .
 
-# Build the main server
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o main cmd/server/main.go
+# Build the device server
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o device-server cmd/device-server/main.go
 
 # Final stage
 FROM alpine:latest
@@ -26,7 +26,7 @@ RUN apk --no-cache add ca-certificates tzdata
 WORKDIR /root/
 
 # Copy the binary from builder
-COPY --from=builder /app/main .
+COPY --from=builder /app/device-server .
 
 # Copy .env.example as default env file
 COPY --from=builder /app/.env.example .env
@@ -34,6 +34,6 @@ COPY --from=builder /app/.env.example .env
 # Create storage directory
 RUN mkdir -p /storage
 
-EXPOSE 8080
+EXPOSE 8081
 
-CMD ["./main"]
+CMD ["./device-server"]

@@ -1,0 +1,39 @@
+{
+	"id": "local-dev-env",
+	"name": "Nebulo - Local Development",
+	"values": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8080",
+			"enabled": true
+		},
+		{
+			"key": "device_url",
+			"value": "http://localhost:8081",
+			"enabled": true
+		},
+		{
+			"key": "device_id",
+			"value": "",
+			"enabled": true
+		},
+		{
+			"key": "file_id",
+			"value": "",
+			"enabled": true
+		},
+		{
+			"key": "transfer_id",
+			"value": "",
+			"enabled": true
+		},
+		{
+			"key": "file_name",
+			"value": "test-file.txt",
+			"enabled": true
+		}
+	],
+	"_postman_variable_scope": "environment",
+	"_postman_exported_at": "2024-01-01T00:00:00.000Z",
+	"_postman_exported_using": "Postman/10.0.0"
+}

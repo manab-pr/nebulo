@@ -1,0 +1,90 @@
+services:
+  mongodb:
+    image: mongo:7.0
+    container_name: nebulo-mongodb
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+      - ./mongo-init:/docker-entrypoint-initdb.d:ro
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: password
+      MONGO_INITDB_DATABASE: nebulo
+
+  redis:
+    image: redis:7.2-alpine
+    container_name: nebulo-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+
+  nebulo-server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: nebulo-server
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      - PORT=8080
+      - APP_ENV=production
+      - APP_NAME=Nebulo
+      - MONGO_URI=mongodb://root:password@mongodb:27017/nebulo?authSource=admin
+      - MONGO_DATABASE=nebulo
+      - REDIS_ADDR=redis:6379
+      - REDIS_PASSWORD=
+      - REDIS_DB=0
+      - STORAGE_PATH=/storage
+      - MAX_FILE_SIZE=100MB
+      - DEVICE_SERVER_PORT=8081
+      - HEARTBEAT_INTERVAL=30s
+      - TRANSFER_TIMEOUT=300s
+      - JWT_SECRET=your-production-secret-key-change-this
+      - JWT_EXPIRES_IN=24h
+    volumes:
+      - nebulo_storage:/storage
+    depends_on:
+      - mongodb
+      - redis
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/health"]
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+      interval: 30s
+
+  nebulo-device:
+    build:
+      context: .
+      dockerfile: Dockerfile.device
+    container_name: nebulo-device
+    restart: unless-stopped
+    ports:
+      - "8081:8081"
+    environment:
+      - PORT=8081
+      - APP_ENV=production
+      - APP_NAME=Nebulo-Device
+      - STORAGE_PATH=/storage
+      - MAX_FILE_SIZE=100MB
+      - DEVICE_SERVER_PORT=8081
+    volumes:
+      - nebulo_device_storage:/storage
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8081/internal/storage"]
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+      interval: 30s
+
+volumes:
+  mongodb_data:
+  redis_data:
+  nebulo_storage:
+  nebulo_device_storage:

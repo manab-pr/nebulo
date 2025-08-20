@@ -2,42 +2,39 @@ package main
 
 import (
 	"log"
-	"net/http"
-	"os"
 
-	"github.com/gin-gonic/gin"
-	"github.com/jinzhu/gorm"
-	"github.com/joho/godotenv"
-)
-
-var (
-	db *gorm.DB
+	"github.com/manab-pr/nebulo/config"
+	"github.com/manab-pr/nebulo/container"
+	"github.com/manab-pr/nebulo/internal/server"
 )
 
 func main() {
-	err := godotenv.Load()
+	// Load configuration
+	cfg := config.LoadConfig()
+
+	// Initialize logger
+	logger := config.InitLogger(cfg.Server.Env)
+	defer logger.Sync()
+
+	// Connect to MongoDB
+	db, err := config.ConnectMongoDB(cfg)
 	if err != nil {
-		log.Fatal("Error loading .env file")
+		logger.Sugar().Fatalf("Failed to connect to MongoDB: %v", err)
 	}
 
-	db, err = gorm.Open("mysql", os.Getenv("DB_CONNECTION_STRING"))
-	if err != nil {
-		log.Fatal("Error connecting to database")
+	// Connect to Redis (optional, can be nil for now)
+	redis := config.ConnectRedis(cfg)
+	if redis == nil {
+		logger.Sugar().Warn("Redis connection failed, continuing without Redis")
 	}
-	defer db.Close()
 
-	r := gin.Default()
-	r.GET("/ping", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{
-			"message": "pong",
-		})
-	})
+	// Initialize app container
+	appContainer := container.NewAppContainer(db, redis, cfg, logger)
+
+	// Initialize server
+	srv := server.NewServer(cfg, logger, appContainer)
+	srv.SetupRoutes()
 
 	// Start server
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = "8080"
-		log.Printf("Defaulting to port %s", port)
-	}
-	r.Run(":" + port)
+	log.Fatal(srv.Run())
 }
