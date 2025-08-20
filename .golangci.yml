@@ -23,7 +23,10 @@ linters-settings:
     lines: 100
     statements: 50
   gci:
-    local-prefixes: github.com/manab-pr/nebulo
+    sections:
+      - standard
+      - default
+      - prefix(github.com/manab-pr/nebulo)
   goconst:
     min-len: 2
     min-occurrences: 2
@@ -44,15 +47,17 @@ linters-settings:
     min-complexity: 15
   goimports:
     local-prefixes: github.com/manab-pr/nebulo
-  golint:
-    min-confidence: 0
-  gomnd:
+  mnd:
     settings:
-      mnd:
-        # don't include the "operation" and "assign"
-        checks: argument,case,condition,return
+      # don't include the "operation" and "assign"
+      checks:
+        - argument
+        - case
+        - condition
+        - return
   govet:
-    check-shadowing: true
+    enable:
+      - shadow
     settings:
       printf:
         funcs:
@@ -78,12 +83,12 @@ linters:
   disable-all: true
   enable:
     - bodyclose
-    - deadcode
     - depguard
     - dogsled
     - dupl
     - errcheck
     - exhaustive
+    - copyloopvar    # replaces scopelint and exportloopref
     - funlen
     - gochecknoinits
     - goconst
@@ -91,29 +96,25 @@ linters:
     - gocyclo
     - gofmt
     - goimports
-    - golint
-    - gomnd
     - goprintffuncname
     - gosec
     - gosimple
     - govet
     - ineffassign
-    - interfacer
     - lll
     - misspell
+    - mnd            # replaces gomnd
     - nakedret
     - noctx
     - nolintlint
+    - revive         # replaces golint
     - rowserrcheck
-    - scopelint
     - staticcheck
-    - structcheck
     - stylecheck
     - typecheck
     - unconvert
     - unparam
-    - unused
-    - varcheck
+    - unused         # replaces deadcode, structcheck, varcheck
     - whitespace
 
   # don't enable:

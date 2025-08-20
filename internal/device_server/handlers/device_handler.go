@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -17,6 +18,20 @@ func NewInternalDeviceHandler(storagePath string) *InternalDeviceHandler {
 	return &InternalDeviceHandler{
 		storagePath: storagePath,
 	}
+}
+
+// sanitizeFileName removes path separators and other dangerous characters from filename
+func sanitizeFileName(filename string) string {
+	// Remove any path separators and clean up the filename
+	clean := filepath.Base(filename)
+	// Replace any remaining path separators or dangerous characters
+	clean = strings.ReplaceAll(clean, "/", "_")
+	clean = strings.ReplaceAll(clean, "\\", "_")
+	clean = strings.ReplaceAll(clean, "..", "_")
+	if clean == "" || clean == "." {
+		return "unnamed_file"
+	}
+	return clean
 }
 
 // StoreFile handles incoming file storage requests from backend
@@ -37,19 +52,23 @@ func (h *InternalDeviceHandler) StoreFile(c *gin.Context) {
 	defer file.Close()
 
 	// Create storage directory if it doesn't exist
-	err = os.MkdirAll(h.storagePath, 0755)
+	err = os.MkdirAll(h.storagePath, 0750)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create storage directory"})
 		return
 	}
 
-	// Create destination file
+	// Create destination file with sanitized filename
 	fileName := c.PostForm("filename")
 	if fileName == "" {
 		fileName = header.Filename
 	}
+	
+	// Sanitize the filename to prevent path traversal attacks
+	safeFileName := sanitizeFileName(fileName)
 
-	dst, err := os.Create(filepath.Join(h.storagePath, fileName))
+	// #nosec G304 - filename is sanitized above to prevent path traversal
+	dst, err := os.Create(filepath.Join(h.storagePath, safeFileName))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create file"})
 		return
