@@ -38,10 +38,11 @@ go.work
 ehthumbs.db
 Thumbs.db
 
-# Storage directories
-storage/
+# Storage directories (data, not code)
+/storage/
 test_storage/
-**/storage/
+data/storage/
+tmp/storage/
 
 # Log files
 *.log
