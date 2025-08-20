@@ -1,6 +1,8 @@
 package server
 
 import (
+	"net/http"
+
 	"github.com/manab-pr/nebulo/config"
 	"github.com/manab-pr/nebulo/container"
 	deviceRoutes "github.com/manab-pr/nebulo/modules/devices/presentation/http/routes"
@@ -43,7 +45,7 @@ func (s *Server) SetupRoutes() {
 
 	// Health check endpoint
 	s.router.GET("/health", func(c *gin.Context) {
-		c.JSON(200, gin.H{
+		c.JSON(http.StatusOK, gin.H{
 			"status":  "ok",
 			"service": s.config.Server.Name,
 		})

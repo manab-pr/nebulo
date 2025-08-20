@@ -15,7 +15,7 @@ type StorageContainer struct {
 	Handler              *storageHandlers.StorageHandler
 }
 
-func NewStorageContainer(db *mongo.Database, deviceRepo deviceRepo.DeviceRepository, fileRepo fileRepo.FileRepository) *StorageContainer {
+func NewStorageContainer(_ *mongo.Database, deviceRepo deviceRepo.DeviceRepository, fileRepo fileRepo.FileRepository) *StorageContainer {
 	// Initialize use cases
 	summaryUseCase := storageUseCases.NewGetStorageSummaryUseCase(deviceRepo, fileRepo)
 	deviceStorageUseCase := storageUseCases.NewGetDeviceStorageUseCase(deviceRepo, fileRepo)

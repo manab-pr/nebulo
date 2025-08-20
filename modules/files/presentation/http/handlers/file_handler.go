@@ -11,6 +11,11 @@ import (
 	"github.com/go-playground/validator/v10"
 )
 
+const (
+	maxUploadMemoryMB = 32
+	mbShift           = 20 // 1 << 20 = 1MB
+)
+
 type FileHandler struct {
 	storeUseCase  *usecases.StoreFileUseCase
 	getUseCase    *usecases.GetFileUseCase
@@ -34,7 +39,7 @@ func NewFileHandler(
 // StoreFile handles file upload and storage
 func (h *FileHandler) StoreFile(c *gin.Context) {
 	// Parse multipart form
-	err := c.Request.ParseMultipartForm(32 << 20) // 32 MB max memory
+	err := c.Request.ParseMultipartForm(maxUploadMemoryMB << mbShift) // 32 MB max memory
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to parse multipart form"})
 		return

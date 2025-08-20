@@ -9,8 +9,12 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
+const (
+	mongoConnectTimeout = 10 * time.Second
+)
+
 func ConnectMongoDB(config *Config) (*mongo.Database, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), mongoConnectTimeout)
 	defer cancel()
 
 	clientOptions := options.Client().ApplyURI(config.Database.URI)

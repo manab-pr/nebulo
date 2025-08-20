@@ -10,6 +10,15 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+const (
+	maxMemoryMB         = 32
+	storageDirPerm      = 0750
+	defaultTotalSpaceGB = 100
+	bytesPerMB          = 1024 * 1024
+	bytesPerGB          = 1024 * 1024 * 1024
+	mbShift             = 20 // 1 << 20 = 1MB
+)
+
 type InternalDeviceHandler struct {
 	storagePath string
 }
@@ -37,7 +46,7 @@ func sanitizeFileName(filename string) string {
 // StoreFile handles incoming file storage requests from backend
 func (h *InternalDeviceHandler) StoreFile(c *gin.Context) {
 	// Parse multipart form
-	err := c.Request.ParseMultipartForm(32 << 20) // 32 MB max memory
+	err := c.Request.ParseMultipartForm(maxMemoryMB << mbShift) // 32 MB max memory
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to parse multipart form"})
 		return
@@ -52,7 +61,7 @@ func (h *InternalDeviceHandler) StoreFile(c *gin.Context) {
 	defer file.Close()
 
 	// Create storage directory if it doesn't exist
-	err = os.MkdirAll(h.storagePath, 0750)
+	err = os.MkdirAll(h.storagePath, storageDirPerm)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create storage directory"})
 		return
@@ -63,7 +72,7 @@ func (h *InternalDeviceHandler) StoreFile(c *gin.Context) {
 	if fileName == "" {
 		fileName = header.Filename
 	}
-	
+
 	// Sanitize the filename to prevent path traversal attacks
 	safeFileName := sanitizeFileName(fileName)
 
@@ -113,11 +122,11 @@ func (h *InternalDeviceHandler) GetFile(c *gin.Context) {
 func (h *InternalDeviceHandler) GetStorageInfo(c *gin.Context) {
 	// Get storage info for the storage path
 	// This is a simplified version - in practice you'd want to get disk usage stats
-	totalSpace := int64(100 * 1024 * 1024 * 1024) // 100GB default
+	totalSpace := int64(defaultTotalSpaceGB * bytesPerGB)
 	usedSpace := int64(0)
 
 	// Walk through storage directory to calculate used space
-	err := filepath.Walk(h.storagePath, func(path string, info os.FileInfo, err error) error {
+	err := filepath.Walk(h.storagePath, func(_ string, info os.FileInfo, err error) error {
 		if err != nil {
 			return nil // Skip files with errors
 		}

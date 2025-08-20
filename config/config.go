@@ -9,6 +9,14 @@ import (
 	"github.com/joho/godotenv"
 )
 
+const (
+	minSizeStringLength = 3
+	bytesPerKB          = 1024
+	bytesPerMB          = 1024 * 1024
+	bytesPerGB          = 1024 * 1024 * 1024
+	defaultFileSizeMB   = 100
+)
+
 type Config struct {
 	Server   ServerConfig
 	Database DatabaseConfig
@@ -103,24 +111,24 @@ func getEnv(key, defaultValue string) string {
 
 func parseFileSize(sizeStr string) int64 {
 	// Simple parser for sizes like "100MB", "1GB", etc.
-	if len(sizeStr) < 3 {
-		return 100 * 1024 * 1024 // Default 100MB
+	if len(sizeStr) < minSizeStringLength {
+		return defaultFileSizeMB * bytesPerMB
 	}
 
 	unit := sizeStr[len(sizeStr)-2:]
 	sizeNumStr := sizeStr[:len(sizeStr)-2]
 	sizeNum, err := strconv.ParseInt(sizeNumStr, 10, 64)
 	if err != nil {
-		return 100 * 1024 * 1024 // Default 100MB
+		return defaultFileSizeMB * bytesPerMB
 	}
 
 	switch unit {
 	case "KB":
-		return sizeNum * 1024
+		return sizeNum * bytesPerKB
 	case "MB":
-		return sizeNum * 1024 * 1024
+		return sizeNum * bytesPerMB
 	case "GB":
-		return sizeNum * 1024 * 1024 * 1024
+		return sizeNum * bytesPerGB
 	default:
 		return sizeNum // Assume bytes
 	}
