@@ -1,10 +1,11 @@
 package container
 
 import (
+	"go.mongodb.org/mongo-driver/mongo"
+
 	userRepo "github.com/manab-pr/nebulo/modules/users/data/mongodb/repository"
 	"github.com/manab-pr/nebulo/modules/users/domain/usecases"
 	"github.com/manab-pr/nebulo/modules/users/presentation/http/handlers"
-	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type UserContainer struct {

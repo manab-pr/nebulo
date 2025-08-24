@@ -18,13 +18,17 @@ type Claims struct {
 }
 
 const (
-	TokenKey = "user_id"
+	TokenKey             = "user_id"
+	TokenExpirationHours = 24
 )
 
 var cfg *config.Config
 
-func init() {
-	cfg = config.LoadConfig()
+func loadConfig() *config.Config {
+	if cfg == nil {
+		cfg = config.LoadConfig()
+	}
+	return cfg
 }
 
 func AuthMiddleware() gin.HandlerFunc {
@@ -40,8 +44,8 @@ func AuthMiddleware() gin.HandlerFunc {
 		tokenString = strings.TrimPrefix(tokenString, "Bearer ")
 
 		claims := &Claims{}
-		token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
-			return []byte(cfg.JWT.Secret), nil
+		token, err := jwt.ParseWithClaims(tokenString, claims, func(_ *jwt.Token) (interface{}, error) {
+			return []byte(loadConfig().JWT.Secret), nil
 		})
 
 		if err != nil || !token.Valid {
@@ -64,8 +68,8 @@ func AuthMiddleware() gin.HandlerFunc {
 	}
 }
 
-func GenerateToken(userID, phoneNumber string) (string, int64, error) {
-	expirationTime := time.Now().Add(24 * time.Hour) // Token valid for 24 hours
+func GenerateToken(userID, phoneNumber string) (tokenString string, expiresAt int64, err error) {
+	expirationTime := time.Now().Add(TokenExpirationHours * time.Hour)
 	claims := &Claims{
 		UserID:      userID,
 		PhoneNumber: phoneNumber,
@@ -76,7 +80,7 @@ func GenerateToken(userID, phoneNumber string) (string, int64, error) {
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	tokenString, err := token.SignedString([]byte(cfg.JWT.Secret))
+	tokenString, err = token.SignedString([]byte(loadConfig().JWT.Secret))
 	if err != nil {
 		return "", 0, err
 	}

@@ -28,7 +28,9 @@ func NewStoreFileUseCase(fileRepo fileRepository.FileRepository, deviceRepo repo
 	}
 }
 
-func (uc *StoreFileUseCase) Execute(ctx context.Context, userID string, req entities.StoreFileRequest, fileData []byte) (*entities.File, error) {
+func (uc *StoreFileUseCase) Execute(
+	ctx context.Context, userID string, req entities.StoreFileRequest, fileData []byte,
+) (*entities.File, error) {
 	userObjectID, err := primitive.ObjectIDFromHex(userID)
 	if err != nil {
 		return nil, errors.New("invalid user ID")

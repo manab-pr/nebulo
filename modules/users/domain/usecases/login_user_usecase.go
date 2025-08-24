@@ -5,9 +5,11 @@ import (
 	"errors"
 	"time"
 
+	"go.mongodb.org/mongo-driver/mongo"
+
+	"github.com/manab-pr/nebulo/modules/users/domain/constants"
 	"github.com/manab-pr/nebulo/modules/users/domain/entities"
 	"github.com/manab-pr/nebulo/modules/users/domain/repository"
-	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type LoginUserUseCase struct {
@@ -32,7 +34,7 @@ func (uc *LoginUserUseCase) Execute(ctx context.Context, req *entities.LoginRequ
 
 	// Generate OTP for login
 	otp := generateOTP()
-	otpExpiry := time.Now().Add(5 * time.Minute)
+	otpExpiry := time.Now().Add(constants.OTPExpirationMinutes * time.Minute)
 
 	err = uc.userRepo.UpdateOTP(ctx, req.PhoneNumber, otp, otpExpiry)
 	if err != nil {

@@ -5,9 +5,10 @@ import (
 	"errors"
 	"strings"
 
+	"go.mongodb.org/mongo-driver/bson/primitive"
+
 	fileEntities "github.com/manab-pr/nebulo/modules/files/domain/entities"
 	fileRepo "github.com/manab-pr/nebulo/modules/files/domain/repository"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type SearchFilesUseCase struct {

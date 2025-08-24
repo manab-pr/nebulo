@@ -3,8 +3,9 @@ package model
 import (
 	"time"
 
-	"github.com/manab-pr/nebulo/modules/users/domain/entities"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+
+	"github.com/manab-pr/nebulo/modules/users/domain/entities"
 )
 
 type UserModel struct {

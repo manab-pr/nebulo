@@ -21,7 +21,9 @@ func NewRegisterDeviceUseCase(deviceRepo repository.DeviceRepository) *RegisterD
 	}
 }
 
-func (uc *RegisterDeviceUseCase) Execute(ctx context.Context, userID string, req entities.DeviceRegistrationRequest) (*entities.Device, error) {
+func (uc *RegisterDeviceUseCase) Execute(
+	ctx context.Context, userID string, req entities.DeviceRegistrationRequest,
+) (*entities.Device, error) {
 	userObjectID, err := primitive.ObjectIDFromHex(userID)
 	if err != nil {
 		return nil, errors.New("invalid user ID")

@@ -4,9 +4,10 @@ import (
 	"context"
 	"errors"
 
+	"go.mongodb.org/mongo-driver/bson/primitive"
+
 	"github.com/manab-pr/nebulo/modules/devices/domain/entities"
 	"github.com/manab-pr/nebulo/modules/devices/domain/repository"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type ListDevicesUseCase struct {

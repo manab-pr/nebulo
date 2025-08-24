@@ -15,6 +15,7 @@ linters-settings:
           - github.com/gin-gonic/gin
           - github.com/go-playground/validator/v10
           - github.com/google/uuid
+          - github.com/golang-jwt/jwt/v4
   dupl:
     threshold: 100
   exhaustive:

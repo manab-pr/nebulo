@@ -108,7 +108,9 @@ func (r *MongoDeviceRepository) Update(ctx context.Context, device *entities.Dev
 	return err
 }
 
-func (r *MongoDeviceRepository) UpdateHeartbeat(ctx context.Context, userID, deviceID primitive.ObjectID, availableStorage, usedStorage int64) error {
+func (r *MongoDeviceRepository) UpdateHeartbeat(
+	ctx context.Context, userID, deviceID primitive.ObjectID, availableStorage, usedStorage int64,
+) error {
 	update := bson.M{
 		"$set": bson.M{
 			"available_storage": availableStorage,

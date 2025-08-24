@@ -5,10 +5,11 @@ import (
 	"errors"
 	"time"
 
+	"go.mongodb.org/mongo-driver/mongo"
+
 	"github.com/manab-pr/nebulo/modules/auth/middleware"
 	"github.com/manab-pr/nebulo/modules/users/domain/entities"
 	"github.com/manab-pr/nebulo/modules/users/domain/repository"
-	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type VerifyOTPUseCase struct {

@@ -5,6 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
+
 	"github.com/manab-pr/nebulo/modules/auth/middleware"
 	"github.com/manab-pr/nebulo/modules/users/domain/entities"
 	"github.com/manab-pr/nebulo/modules/users/domain/usecases"

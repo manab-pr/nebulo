@@ -7,12 +7,14 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+
+	"github.com/manab-pr/nebulo/modules/users/domain/constants"
 )
 
 func CreateUserIndexes(db *mongo.Database) error {
 	collection := db.Collection("users")
-	
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+
+	ctx, cancel := context.WithTimeout(context.Background(), constants.IndexTimeoutSeconds*time.Second)
 	defer cancel()
 
 	// Create unique index on phone_number

@@ -7,9 +7,11 @@ import (
 	"math/big"
 	"time"
 
+	"go.mongodb.org/mongo-driver/mongo"
+
+	"github.com/manab-pr/nebulo/modules/users/domain/constants"
 	"github.com/manab-pr/nebulo/modules/users/domain/entities"
 	"github.com/manab-pr/nebulo/modules/users/domain/repository"
-	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type RegisterUserUseCase struct {
@@ -36,8 +38,8 @@ func (uc *RegisterUserUseCase) Execute(ctx context.Context, req *entities.Regist
 		// User exists, generate new OTP
 		user = existingUser
 		otp = generateOTP()
-		otpExpiry := time.Now().Add(5 * time.Minute) // OTP valid for 5 minutes
-		
+		otpExpiry := time.Now().Add(constants.OTPExpirationMinutes * time.Minute)
+
 		err = uc.userRepo.UpdateOTP(ctx, req.PhoneNumber, otp, otpExpiry)
 		if err != nil {
 			return nil, "", err
@@ -47,8 +49,8 @@ func (uc *RegisterUserUseCase) Execute(ctx context.Context, req *entities.Regist
 	} else {
 		// Create new user
 		otp = generateOTP()
-		otpExpiry := time.Now().Add(5 * time.Minute)
-		
+		otpExpiry := time.Now().Add(constants.OTPExpirationMinutes * time.Minute)
+
 		user = &entities.User{
 			PhoneNumber: req.PhoneNumber,
 			Name:        req.Name,
@@ -69,9 +71,9 @@ func (uc *RegisterUserUseCase) Execute(ctx context.Context, req *entities.Regist
 }
 
 func generateOTP() string {
-	max := big.NewInt(999999)
-	min := big.NewInt(100000)
-	
-	n, _ := rand.Int(rand.Reader, max.Sub(max, min).Add(max, big.NewInt(1)))
-	return fmt.Sprintf("%06d", n.Add(n, min).Int64())
+	maxVal := big.NewInt(constants.OTPMaxValue)
+	minVal := big.NewInt(constants.OTPMinValue)
+
+	n, _ := rand.Int(rand.Reader, maxVal.Sub(maxVal, minVal).Add(maxVal, big.NewInt(1)))
+	return fmt.Sprintf("%06d", n.Add(n, minVal).Int64())
 }

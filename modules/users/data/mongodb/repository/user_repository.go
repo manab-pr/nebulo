@@ -4,18 +4,20 @@ import (
 	"context"
 	"time"
 
-	"github.com/manab-pr/nebulo/modules/users/data/mongodb/model"
-	"github.com/manab-pr/nebulo/modules/users/domain/entities"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+
+	"github.com/manab-pr/nebulo/modules/users/data/mongodb/model"
+	"github.com/manab-pr/nebulo/modules/users/domain/entities"
+	"github.com/manab-pr/nebulo/modules/users/domain/repository"
 )
 
 type userRepository struct {
 	collection *mongo.Collection
 }
 
-func NewUserRepository(db *mongo.Database) *userRepository {
+func NewUserRepository(db *mongo.Database) repository.UserRepository {
 	return &userRepository{
 		collection: db.Collection("users"),
 	}

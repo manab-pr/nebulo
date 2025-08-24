@@ -10,8 +10,6 @@ import (
 func SetupSearchRoutes(router *gin.RouterGroup, handler *handlers.SearchHandler) {
 	files := router.Group("/files")
 	files.Use(middleware.AuthMiddleware()) // Require authentication for all search routes
-	{
-		files.GET("/search", handler.SearchFiles)
-		files.GET("/location/:fileId", handler.GetFileLocation)
-	}
+	files.GET("/search", handler.SearchFiles)
+	files.GET("/location/:fileId", handler.GetFileLocation)
 }
