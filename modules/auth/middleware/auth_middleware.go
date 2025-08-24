@@ -5,6 +5,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/manab-pr/nebulo/config"
+
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v4"
 )
@@ -16,9 +18,14 @@ type Claims struct {
 }
 
 const (
-	JWTSecret = "nebulo-secret-key-2024" // In production, use environment variable
-	TokenKey  = "user_id"
+	TokenKey = "user_id"
 )
+
+var cfg *config.Config
+
+func init() {
+	cfg = config.LoadConfig()
+}
 
 func AuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -30,13 +37,11 @@ func AuthMiddleware() gin.HandlerFunc {
 		}
 
 		// Remove "Bearer " prefix
-		if strings.HasPrefix(tokenString, "Bearer ") {
-			tokenString = tokenString[7:]
-		}
+		tokenString = strings.TrimPrefix(tokenString, "Bearer ")
 
 		claims := &Claims{}
 		token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
-			return []byte(JWTSecret), nil
+			return []byte(cfg.JWT.Secret), nil
 		})
 
 		if err != nil || !token.Valid {
@@ -71,7 +76,7 @@ func GenerateToken(userID, phoneNumber string) (string, int64, error) {
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	tokenString, err := token.SignedString([]byte(JWTSecret))
+	tokenString, err := token.SignedString([]byte(cfg.JWT.Secret))
 	if err != nil {
 		return "", 0, err
 	}
