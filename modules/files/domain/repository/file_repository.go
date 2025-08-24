@@ -10,11 +10,11 @@ import (
 
 type FileRepository interface {
 	Create(ctx context.Context, file *entities.File) (*entities.File, error)
-	GetByID(ctx context.Context, id primitive.ObjectID) (*entities.File, error)
-	GetAll(ctx context.Context) ([]*entities.File, error)
-	GetByDeviceID(ctx context.Context, deviceID primitive.ObjectID) ([]*entities.File, error)
+	GetByID(ctx context.Context, userID, fileID primitive.ObjectID) (*entities.File, error)
+	GetAllByUser(ctx context.Context, userID primitive.ObjectID) ([]*entities.File, error)
+	GetByUserAndDeviceID(ctx context.Context, userID, deviceID primitive.ObjectID) ([]*entities.File, error)
 	Update(ctx context.Context, file *entities.File) error
-	Delete(ctx context.Context, id primitive.ObjectID) error
-	UpdateStatus(ctx context.Context, id primitive.ObjectID, status entities.FileStatus) error
-	SearchByName(ctx context.Context, name string) ([]*entities.File, error)
+	Delete(ctx context.Context, userID, fileID primitive.ObjectID) error
+	UpdateStatus(ctx context.Context, userID, fileID primitive.ObjectID, status entities.FileStatus) error
+	SearchByNameForUser(ctx context.Context, userID primitive.ObjectID, name string) ([]*entities.File, error)
 }

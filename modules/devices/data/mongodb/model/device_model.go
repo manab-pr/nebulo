@@ -10,6 +10,7 @@ import (
 
 type DeviceModel struct {
 	ID               primitive.ObjectID `bson:"_id,omitempty"`
+	UserID           primitive.ObjectID `bson:"user_id"`
 	Name             string             `bson:"name"`
 	IPAddress        string             `bson:"ip_address"`
 	Type             string             `bson:"type"`
@@ -25,6 +26,7 @@ type DeviceModel struct {
 func (d *DeviceModel) ToEntity() *entities.Device {
 	return &entities.Device{
 		ID:               d.ID,
+		UserID:           d.UserID,
 		Name:             d.Name,
 		IPAddress:        d.IPAddress,
 		Type:             d.Type,
@@ -41,6 +43,7 @@ func (d *DeviceModel) ToEntity() *entities.Device {
 func FromEntity(device *entities.Device) *DeviceModel {
 	return &DeviceModel{
 		ID:               device.ID,
+		UserID:           device.UserID,
 		Name:             device.Name,
 		IPAddress:        device.IPAddress,
 		Type:             device.Type,

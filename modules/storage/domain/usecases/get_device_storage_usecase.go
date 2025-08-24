@@ -23,24 +23,29 @@ func NewGetDeviceStorageUseCase(deviceRepo deviceRepo.DeviceRepository, fileRepo
 	}
 }
 
-func (uc *GetDeviceStorageUseCase) Execute(ctx context.Context, deviceID string) (*entities.DeviceStorageInfo, error) {
-	id, err := primitive.ObjectIDFromHex(deviceID)
+func (uc *GetDeviceStorageUseCase) Execute(ctx context.Context, userID, deviceID string) (*entities.DeviceStorageInfo, error) {
+	userObjectID, err := primitive.ObjectIDFromHex(userID)
+	if err != nil {
+		return nil, errors.New("invalid user ID")
+	}
+
+	deviceObjectID, err := primitive.ObjectIDFromHex(deviceID)
 	if err != nil {
 		return nil, errors.New("invalid device ID")
 	}
 
-	// Get device
-	device, err := uc.deviceRepo.GetByID(ctx, id)
+	// Get device (user-scoped)
+	device, err := uc.deviceRepo.GetByID(ctx, userObjectID, deviceObjectID)
 	if err != nil {
 		return nil, err
 	}
 
 	if device == nil {
-		return nil, errors.New("device not found")
+		return nil, errors.New("device not found or does not belong to you")
 	}
 
-	// Get files stored on this device
-	files, err := uc.fileRepo.GetByDeviceID(ctx, id)
+	// Get files stored on this device (user-scoped)
+	files, err := uc.fileRepo.GetByUserAndDeviceID(ctx, userObjectID, deviceObjectID)
 	if err != nil {
 		return nil, err
 	}

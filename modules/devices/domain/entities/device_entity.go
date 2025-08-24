@@ -8,6 +8,7 @@ import (
 
 type Device struct {
 	ID               primitive.ObjectID `bson:"_id,omitempty"`
+	UserID           primitive.ObjectID `bson:"user_id"` // Links device to specific user
 	Name             string             `bson:"name"`
 	IPAddress        string             `bson:"ip_address"`
 	Type             string             `bson:"type"`

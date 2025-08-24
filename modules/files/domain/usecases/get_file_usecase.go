@@ -20,26 +20,36 @@ func NewGetFileUseCase(fileRepo repository.FileRepository) *GetFileUseCase {
 	}
 }
 
-func (uc *GetFileUseCase) Execute(ctx context.Context, fileID string) (*entities.File, error) {
-	id, err := primitive.ObjectIDFromHex(fileID)
+func (uc *GetFileUseCase) Execute(ctx context.Context, userID, fileID string) (*entities.File, error) {
+	userObjectID, err := primitive.ObjectIDFromHex(userID)
+	if err != nil {
+		return nil, errors.New("invalid user ID")
+	}
+
+	fileObjectID, err := primitive.ObjectIDFromHex(fileID)
 	if err != nil {
 		return nil, errors.New("invalid file ID")
 	}
 
-	file, err := uc.fileRepo.GetByID(ctx, id)
+	file, err := uc.fileRepo.GetByID(ctx, userObjectID, fileObjectID)
 	if err != nil {
 		return nil, err
 	}
 
 	if file == nil {
-		return nil, errors.New("file not found")
+		return nil, errors.New("file not found or does not belong to you")
 	}
 
 	return file, nil
 }
 
-func (uc *GetFileUseCase) GetAllFiles(ctx context.Context) ([]*entities.File, error) {
-	files, err := uc.fileRepo.GetAll(ctx)
+func (uc *GetFileUseCase) GetAllFiles(ctx context.Context, userID string) ([]*entities.File, error) {
+	userObjectID, err := primitive.ObjectIDFromHex(userID)
+	if err != nil {
+		return nil, errors.New("invalid user ID")
+	}
+
+	files, err := uc.fileRepo.GetAllByUser(ctx, userObjectID)
 	if err != nil {
 		return nil, err
 	}

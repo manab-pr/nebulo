@@ -20,31 +20,36 @@ func NewDeleteFileUseCase(fileRepo repository.FileRepository) *DeleteFileUseCase
 	}
 }
 
-func (uc *DeleteFileUseCase) Execute(ctx context.Context, fileID string) error {
-	id, err := primitive.ObjectIDFromHex(fileID)
+func (uc *DeleteFileUseCase) Execute(ctx context.Context, userID, fileID string) error {
+	userObjectID, err := primitive.ObjectIDFromHex(userID)
+	if err != nil {
+		return errors.New("invalid user ID")
+	}
+
+	fileObjectID, err := primitive.ObjectIDFromHex(fileID)
 	if err != nil {
 		return errors.New("invalid file ID")
 	}
 
-	// Check if file exists
-	file, err := uc.fileRepo.GetByID(ctx, id)
+	// Check if file exists and belongs to user
+	file, err := uc.fileRepo.GetByID(ctx, userObjectID, fileObjectID)
 	if err != nil {
 		return err
 	}
 
 	if file == nil {
-		return errors.New("file not found")
+		return errors.New("file not found or does not belong to you")
 	}
 
 	// TODO: Send delete request to the device where file is stored
 	// For now, we'll just mark it as deleted and remove from database
-	err = uc.fileRepo.UpdateStatus(ctx, id, entities.FileStatusDeleted)
+	err = uc.fileRepo.UpdateStatus(ctx, userObjectID, fileObjectID, entities.FileStatusDeleted)
 	if err != nil {
 		return err
 	}
 
 	// Remove file record from database
-	err = uc.fileRepo.Delete(ctx, id)
+	err = uc.fileRepo.Delete(ctx, userObjectID, fileObjectID)
 	if err != nil {
 		return err
 	}

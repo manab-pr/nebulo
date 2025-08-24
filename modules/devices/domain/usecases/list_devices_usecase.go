@@ -2,9 +2,11 @@ package usecases
 
 import (
 	"context"
+	"errors"
 
 	"github.com/manab-pr/nebulo/modules/devices/domain/entities"
 	"github.com/manab-pr/nebulo/modules/devices/domain/repository"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type ListDevicesUseCase struct {
@@ -17,8 +19,13 @@ func NewListDevicesUseCase(deviceRepo repository.DeviceRepository) *ListDevicesU
 	}
 }
 
-func (uc *ListDevicesUseCase) Execute(ctx context.Context) ([]*entities.Device, error) {
-	devices, err := uc.deviceRepo.GetAll(ctx)
+func (uc *ListDevicesUseCase) Execute(ctx context.Context, userID string) ([]*entities.Device, error) {
+	userObjectID, err := primitive.ObjectIDFromHex(userID)
+	if err != nil {
+		return nil, errors.New("invalid user ID")
+	}
+
+	devices, err := uc.deviceRepo.GetAllByUser(ctx, userObjectID)
 	if err != nil {
 		return nil, err
 	}
@@ -26,8 +33,13 @@ func (uc *ListDevicesUseCase) Execute(ctx context.Context) ([]*entities.Device, 
 	return devices, nil
 }
 
-func (uc *ListDevicesUseCase) GetOnlineDevices(ctx context.Context) ([]*entities.Device, error) {
-	devices, err := uc.deviceRepo.GetOnlineDevices(ctx)
+func (uc *ListDevicesUseCase) GetOnlineDevices(ctx context.Context, userID string) ([]*entities.Device, error) {
+	userObjectID, err := primitive.ObjectIDFromHex(userID)
+	if err != nil {
+		return nil, errors.New("invalid user ID")
+	}
+
+	devices, err := uc.deviceRepo.GetOnlineDevicesByUser(ctx, userObjectID)
 	if err != nil {
 		return nil, err
 	}

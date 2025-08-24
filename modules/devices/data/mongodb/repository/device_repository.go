@@ -34,10 +34,10 @@ func (r *MongoDeviceRepository) Create(ctx context.Context, device *entities.Dev
 	return device, nil
 }
 
-func (r *MongoDeviceRepository) GetByID(ctx context.Context, id primitive.ObjectID) (*entities.Device, error) {
+func (r *MongoDeviceRepository) GetByID(ctx context.Context, userID, deviceID primitive.ObjectID) (*entities.Device, error) {
 	var deviceModel model.DeviceModel
 
-	err := r.collection.FindOne(ctx, bson.M{"_id": id}).Decode(&deviceModel)
+	err := r.collection.FindOne(ctx, bson.M{"_id": deviceID, "user_id": userID}).Decode(&deviceModel)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
 			return nil, nil
@@ -48,10 +48,10 @@ func (r *MongoDeviceRepository) GetByID(ctx context.Context, id primitive.Object
 	return deviceModel.ToEntity(), nil
 }
 
-func (r *MongoDeviceRepository) GetByIPAddress(ctx context.Context, ipAddress string) (*entities.Device, error) {
+func (r *MongoDeviceRepository) GetByIPAddress(ctx context.Context, userID primitive.ObjectID, ipAddress string) (*entities.Device, error) {
 	var deviceModel model.DeviceModel
 
-	err := r.collection.FindOne(ctx, bson.M{"ip_address": ipAddress}).Decode(&deviceModel)
+	err := r.collection.FindOne(ctx, bson.M{"ip_address": ipAddress, "user_id": userID}).Decode(&deviceModel)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
 			return nil, nil
@@ -62,8 +62,8 @@ func (r *MongoDeviceRepository) GetByIPAddress(ctx context.Context, ipAddress st
 	return deviceModel.ToEntity(), nil
 }
 
-func (r *MongoDeviceRepository) GetAll(ctx context.Context) ([]*entities.Device, error) {
-	cursor, err := r.collection.Find(ctx, bson.M{})
+func (r *MongoDeviceRepository) GetAllByUser(ctx context.Context, userID primitive.ObjectID) ([]*entities.Device, error) {
+	cursor, err := r.collection.Find(ctx, bson.M{"user_id": userID})
 	if err != nil {
 		return nil, err
 	}
@@ -81,8 +81,8 @@ func (r *MongoDeviceRepository) GetAll(ctx context.Context) ([]*entities.Device,
 	return devices, nil
 }
 
-func (r *MongoDeviceRepository) GetOnlineDevices(ctx context.Context) ([]*entities.Device, error) {
-	cursor, err := r.collection.Find(ctx, bson.M{"status": string(entities.DeviceStatusOnline)})
+func (r *MongoDeviceRepository) GetOnlineDevicesByUser(ctx context.Context, userID primitive.ObjectID) ([]*entities.Device, error) {
+	cursor, err := r.collection.Find(ctx, bson.M{"status": string(entities.DeviceStatusOnline), "user_id": userID})
 	if err != nil {
 		return nil, err
 	}
@@ -104,11 +104,11 @@ func (r *MongoDeviceRepository) Update(ctx context.Context, device *entities.Dev
 	deviceModel := model.FromEntity(device)
 	deviceModel.UpdatedAt = time.Now()
 
-	_, err := r.collection.ReplaceOne(ctx, bson.M{"_id": device.ID}, deviceModel)
+	_, err := r.collection.ReplaceOne(ctx, bson.M{"_id": device.ID, "user_id": device.UserID}, deviceModel)
 	return err
 }
 
-func (r *MongoDeviceRepository) UpdateHeartbeat(ctx context.Context, id primitive.ObjectID, availableStorage, usedStorage int64) error {
+func (r *MongoDeviceRepository) UpdateHeartbeat(ctx context.Context, userID, deviceID primitive.ObjectID, availableStorage, usedStorage int64) error {
 	update := bson.M{
 		"$set": bson.M{
 			"available_storage": availableStorage,
@@ -118,16 +118,16 @@ func (r *MongoDeviceRepository) UpdateHeartbeat(ctx context.Context, id primitiv
 		},
 	}
 
-	_, err := r.collection.UpdateOne(ctx, bson.M{"_id": id}, update)
+	_, err := r.collection.UpdateOne(ctx, bson.M{"_id": deviceID, "user_id": userID}, update)
 	return err
 }
 
-func (r *MongoDeviceRepository) Delete(ctx context.Context, id primitive.ObjectID) error {
-	_, err := r.collection.DeleteOne(ctx, bson.M{"_id": id})
+func (r *MongoDeviceRepository) Delete(ctx context.Context, userID, deviceID primitive.ObjectID) error {
+	_, err := r.collection.DeleteOne(ctx, bson.M{"_id": deviceID, "user_id": userID})
 	return err
 }
 
-func (r *MongoDeviceRepository) UpdateStatus(ctx context.Context, id primitive.ObjectID, status entities.DeviceStatus) error {
+func (r *MongoDeviceRepository) UpdateStatus(ctx context.Context, userID, deviceID primitive.ObjectID, status entities.DeviceStatus) error {
 	update := bson.M{
 		"$set": bson.M{
 			"status":     string(status),
@@ -135,6 +135,6 @@ func (r *MongoDeviceRepository) UpdateStatus(ctx context.Context, id primitive.O
 		},
 	}
 
-	_, err := r.collection.UpdateOne(ctx, bson.M{"_id": id}, update)
+	_, err := r.collection.UpdateOne(ctx, bson.M{"_id": deviceID, "user_id": userID}, update)
 	return err
 }

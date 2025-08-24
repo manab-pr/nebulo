@@ -20,26 +20,31 @@ func NewHeartbeatUseCase(deviceRepo repository.DeviceRepository) *HeartbeatUseCa
 	}
 }
 
-func (uc *HeartbeatUseCase) Execute(ctx context.Context, req entities.DeviceHeartbeatRequest) error {
+func (uc *HeartbeatUseCase) Execute(ctx context.Context, userID string, req entities.DeviceHeartbeatRequest) error {
+	userObjectID, err := primitive.ObjectIDFromHex(userID)
+	if err != nil {
+		return errors.New("invalid user ID")
+	}
+
 	deviceID, err := primitive.ObjectIDFromHex(req.DeviceID)
 	if err != nil {
 		return errors.New("invalid device ID")
 	}
 
-	// Check if device exists
-	device, err := uc.deviceRepo.GetByID(ctx, deviceID)
+	// Check if device exists and belongs to user
+	device, err := uc.deviceRepo.GetByID(ctx, userObjectID, deviceID)
 	if err != nil || device == nil {
-		return errors.New("device not found")
+		return errors.New("device not found or does not belong to you")
 	}
 
 	// Update heartbeat and storage info
-	err = uc.deviceRepo.UpdateHeartbeat(ctx, deviceID, req.AvailableStorage, req.UsedStorage)
+	err = uc.deviceRepo.UpdateHeartbeat(ctx, userObjectID, deviceID, req.AvailableStorage, req.UsedStorage)
 	if err != nil {
 		return err
 	}
 
 	// Update device status to online
-	err = uc.deviceRepo.UpdateStatus(ctx, deviceID, entities.DeviceStatusOnline)
+	err = uc.deviceRepo.UpdateStatus(ctx, userObjectID, deviceID, entities.DeviceStatusOnline)
 	if err != nil {
 		return err
 	}

@@ -2,10 +2,12 @@ package usecases
 
 import (
 	"context"
+	"errors"
 	"strings"
 
 	fileEntities "github.com/manab-pr/nebulo/modules/files/domain/entities"
 	fileRepo "github.com/manab-pr/nebulo/modules/files/domain/repository"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type SearchFilesUseCase struct {
@@ -18,14 +20,19 @@ func NewSearchFilesUseCase(fileRepo fileRepo.FileRepository) *SearchFilesUseCase
 	}
 }
 
-func (uc *SearchFilesUseCase) Execute(ctx context.Context, query string) ([]*fileEntities.File, error) {
-	if strings.TrimSpace(query) == "" {
-		// If no query provided, return all files
-		return uc.fileRepo.GetAll(ctx)
+func (uc *SearchFilesUseCase) Execute(ctx context.Context, userID, query string) ([]*fileEntities.File, error) {
+	userObjectID, err := primitive.ObjectIDFromHex(userID)
+	if err != nil {
+		return nil, errors.New("invalid user ID")
 	}
 
-	// Search files by name
-	files, err := uc.fileRepo.SearchByName(ctx, query)
+	if strings.TrimSpace(query) == "" {
+		// If no query provided, return all user's files
+		return uc.fileRepo.GetAllByUser(ctx, userObjectID)
+	}
+
+	// Search files by name for specific user
+	files, err := uc.fileRepo.SearchByNameForUser(ctx, userObjectID, query)
 	if err != nil {
 		return nil, err
 	}

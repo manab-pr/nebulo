@@ -4,6 +4,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/manab-pr/nebulo/modules/auth/middleware"
 	"github.com/manab-pr/nebulo/modules/files/domain/usecases"
 	"github.com/manab-pr/nebulo/modules/files/presentation/http/dto"
 
@@ -38,6 +39,12 @@ func NewFileHandler(
 
 // StoreFile handles file upload and storage
 func (h *FileHandler) StoreFile(c *gin.Context) {
+	userID, exists := middleware.GetUserIDFromContext(c)
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
+		return
+	}
+
 	// Parse multipart form
 	err := c.Request.ParseMultipartForm(maxUploadMemoryMB << mbShift) // 32 MB max memory
 	if err != nil {
@@ -73,7 +80,7 @@ func (h *FileHandler) StoreFile(c *gin.Context) {
 		return
 	}
 
-	storedFile, err := h.storeUseCase.Execute(c.Request.Context(), req.ToEntity(), fileData)
+	storedFile, err := h.storeUseCase.Execute(c.Request.Context(), userID, req.ToEntity(), fileData)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -88,13 +95,19 @@ func (h *FileHandler) StoreFile(c *gin.Context) {
 
 // GetFile handles file metadata retrieval
 func (h *FileHandler) GetFile(c *gin.Context) {
+	userID, exists := middleware.GetUserIDFromContext(c)
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
+		return
+	}
+
 	fileID := c.Param("fileId")
 	if fileID == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "File ID is required"})
 		return
 	}
 
-	file, err := h.getUseCase.Execute(c.Request.Context(), fileID)
+	file, err := h.getUseCase.Execute(c.Request.Context(), userID, fileID)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 		return
@@ -109,7 +122,13 @@ func (h *FileHandler) GetFile(c *gin.Context) {
 
 // GetAllFiles handles listing all files
 func (h *FileHandler) GetAllFiles(c *gin.Context) {
-	files, err := h.getUseCase.GetAllFiles(c.Request.Context())
+	userID, exists := middleware.GetUserIDFromContext(c)
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
+		return
+	}
+
+	files, err := h.getUseCase.GetAllFiles(c.Request.Context(), userID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -124,13 +143,19 @@ func (h *FileHandler) GetAllFiles(c *gin.Context) {
 
 // DeleteFile handles file deletion
 func (h *FileHandler) DeleteFile(c *gin.Context) {
+	userID, exists := middleware.GetUserIDFromContext(c)
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
+		return
+	}
+
 	fileID := c.Param("fileId")
 	if fileID == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "File ID is required"})
 		return
 	}
 
-	err := h.deleteUseCase.Execute(c.Request.Context(), fileID)
+	err := h.deleteUseCase.Execute(c.Request.Context(), userID, fileID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

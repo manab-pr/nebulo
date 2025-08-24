@@ -28,9 +28,13 @@ func NewStoreFileUseCase(fileRepo fileRepository.FileRepository, deviceRepo repo
 	}
 }
 
-func (uc *StoreFileUseCase) Execute(ctx context.Context, req entities.StoreFileRequest, fileData []byte) (*entities.File, error) {
+func (uc *StoreFileUseCase) Execute(ctx context.Context, userID string, req entities.StoreFileRequest, fileData []byte) (*entities.File, error) {
+	userObjectID, err := primitive.ObjectIDFromHex(userID)
+	if err != nil {
+		return nil, errors.New("invalid user ID")
+	}
+
 	var selectedDevice *deviceEntities.Device
-	var err error
 
 	// Select target device
 	if req.TargetDevice != "" {
@@ -39,16 +43,16 @@ func (uc *StoreFileUseCase) Execute(ctx context.Context, req entities.StoreFileR
 		if parseErr != nil {
 			return nil, errors.New("invalid target device ID")
 		}
-		selectedDevice, err = uc.deviceRepo.GetByID(ctx, deviceID)
+		selectedDevice, err = uc.deviceRepo.GetByID(ctx, userObjectID, deviceID)
 		if err != nil || selectedDevice == nil {
-			return nil, errors.New("target device not found")
+			return nil, errors.New("target device not found or does not belong to you")
 		}
 		if selectedDevice.Status != deviceEntities.DeviceStatusOnline {
 			return nil, errors.New("target device is not online")
 		}
 	} else {
 		// Find an online device with sufficient space
-		onlineDevices, deviceErr := uc.deviceRepo.GetOnlineDevices(ctx)
+		onlineDevices, deviceErr := uc.deviceRepo.GetOnlineDevicesByUser(ctx, userObjectID)
 		if deviceErr != nil {
 			return nil, deviceErr
 		}
@@ -76,6 +80,7 @@ func (uc *StoreFileUseCase) Execute(ctx context.Context, req entities.StoreFileR
 	// Create file record
 	file := &entities.File{
 		ID:           primitive.NewObjectID(),
+		UserID:       userObjectID,
 		Name:         fileName,
 		OriginalName: req.Name,
 		Size:         req.Size,
@@ -95,7 +100,7 @@ func (uc *StoreFileUseCase) Execute(ctx context.Context, req entities.StoreFileR
 
 	// TODO: Send file to device (this would be done via HTTP call to device's internal server)
 	// For now, we'll mark it as stored immediately
-	err = uc.fileRepo.UpdateStatus(ctx, createdFile.ID, entities.FileStatusStored)
+	err = uc.fileRepo.UpdateStatus(ctx, userObjectID, createdFile.ID, entities.FileStatusStored)
 	if err != nil {
 		return nil, err
 	}

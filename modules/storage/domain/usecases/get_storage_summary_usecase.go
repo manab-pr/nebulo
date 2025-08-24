@@ -2,11 +2,13 @@ package usecases
 
 import (
 	"context"
+	"errors"
 
 	deviceEntities "github.com/manab-pr/nebulo/modules/devices/domain/entities"
 	deviceRepo "github.com/manab-pr/nebulo/modules/devices/domain/repository"
 	fileRepo "github.com/manab-pr/nebulo/modules/files/domain/repository"
 	"github.com/manab-pr/nebulo/modules/storage/domain/entities"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type GetStorageSummaryUseCase struct {
@@ -21,15 +23,20 @@ func NewGetStorageSummaryUseCase(deviceRepo deviceRepo.DeviceRepository, fileRep
 	}
 }
 
-func (uc *GetStorageSummaryUseCase) Execute(ctx context.Context) (*entities.StorageSummary, error) {
-	// Get all devices
-	devices, err := uc.deviceRepo.GetAll(ctx)
+func (uc *GetStorageSummaryUseCase) Execute(ctx context.Context, userID string) (*entities.StorageSummary, error) {
+	userObjectID, err := primitive.ObjectIDFromHex(userID)
+	if err != nil {
+		return nil, errors.New("invalid user ID")
+	}
+
+	// Get user's devices
+	devices, err := uc.deviceRepo.GetAllByUser(ctx, userObjectID)
 	if err != nil {
 		return nil, err
 	}
 
-	// Get all files
-	files, err := uc.fileRepo.GetAll(ctx)
+	// Get user's files
+	files, err := uc.fileRepo.GetAllByUser(ctx, userObjectID)
 	if err != nil {
 		return nil, err
 	}

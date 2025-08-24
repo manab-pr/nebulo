@@ -32,30 +32,35 @@ func NewGetFileLocationUseCase(fileRepo fileRepo.FileRepository, deviceRepo devi
 	}
 }
 
-func (uc *GetFileLocationUseCase) Execute(ctx context.Context, fileID string) (*FileLocationInfo, error) {
-	id, err := primitive.ObjectIDFromHex(fileID)
+func (uc *GetFileLocationUseCase) Execute(ctx context.Context, userID, fileID string) (*FileLocationInfo, error) {
+	userObjectID, err := primitive.ObjectIDFromHex(userID)
+	if err != nil {
+		return nil, errors.New("invalid user ID")
+	}
+
+	fileObjectID, err := primitive.ObjectIDFromHex(fileID)
 	if err != nil {
 		return nil, errors.New("invalid file ID")
 	}
 
-	// Get file
-	file, err := uc.fileRepo.GetByID(ctx, id)
+	// Get file (user-scoped)
+	file, err := uc.fileRepo.GetByID(ctx, userObjectID, fileObjectID)
 	if err != nil {
 		return nil, err
 	}
 
 	if file == nil {
-		return nil, errors.New("file not found")
+		return nil, errors.New("file not found or does not belong to you")
 	}
 
-	// Get device where file is stored
-	device, err := uc.deviceRepo.GetByID(ctx, file.StoredOn)
+	// Get device where file is stored (user-scoped)
+	device, err := uc.deviceRepo.GetByID(ctx, userObjectID, file.StoredOn)
 	if err != nil {
 		return nil, err
 	}
 
 	if device == nil {
-		return nil, errors.New("device not found")
+		return nil, errors.New("device not found or does not belong to you")
 	}
 
 	locationInfo := &FileLocationInfo{

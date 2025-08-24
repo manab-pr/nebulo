@@ -8,6 +8,7 @@ import (
 
 type File struct {
 	ID           primitive.ObjectID `bson:"_id,omitempty"`
+	UserID       primitive.ObjectID `bson:"user_id"` // Links file to specific user
 	Name         string             `bson:"name"`
 	OriginalName string             `bson:"original_name"`
 	Size         int64              `bson:"size"`

@@ -19,20 +19,25 @@ func NewDeleteDeviceUseCase(deviceRepo repository.DeviceRepository) *DeleteDevic
 	}
 }
 
-func (uc *DeleteDeviceUseCase) Execute(ctx context.Context, deviceID string) error {
-	id, err := primitive.ObjectIDFromHex(deviceID)
+func (uc *DeleteDeviceUseCase) Execute(ctx context.Context, userID, deviceID string) error {
+	userObjectID, err := primitive.ObjectIDFromHex(userID)
+	if err != nil {
+		return errors.New("invalid user ID")
+	}
+
+	deviceObjectID, err := primitive.ObjectIDFromHex(deviceID)
 	if err != nil {
 		return errors.New("invalid device ID")
 	}
 
-	// Check if device exists
-	device, err := uc.deviceRepo.GetByID(ctx, id)
+	// Check if device exists and belongs to user
+	device, err := uc.deviceRepo.GetByID(ctx, userObjectID, deviceObjectID)
 	if err != nil || device == nil {
-		return errors.New("device not found")
+		return errors.New("device not found or does not belong to you")
 	}
 
 	// Delete device
-	err = uc.deviceRepo.Delete(ctx, id)
+	err = uc.deviceRepo.Delete(ctx, userObjectID, deviceObjectID)
 	if err != nil {
 		return err
 	}

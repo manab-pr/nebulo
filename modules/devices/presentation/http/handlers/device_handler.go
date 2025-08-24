@@ -3,6 +3,7 @@ package handlers
 import (
 	"net/http"
 
+	"github.com/manab-pr/nebulo/modules/auth/middleware"
 	"github.com/manab-pr/nebulo/modules/devices/domain/usecases"
 	"github.com/manab-pr/nebulo/modules/devices/presentation/http/dto"
 
@@ -35,6 +36,12 @@ func NewDeviceHandler(
 
 // RegisterDevice handles device registration
 func (h *DeviceHandler) RegisterDevice(c *gin.Context) {
+	userID, exists := middleware.GetUserIDFromContext(c)
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
+		return
+	}
+
 	var req dto.DeviceRegisterRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -46,7 +53,7 @@ func (h *DeviceHandler) RegisterDevice(c *gin.Context) {
 		return
 	}
 
-	device, err := h.registerUseCase.Execute(c.Request.Context(), req.ToEntity())
+	device, err := h.registerUseCase.Execute(c.Request.Context(), userID, req.ToEntity())
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -61,6 +68,12 @@ func (h *DeviceHandler) RegisterDevice(c *gin.Context) {
 
 // Heartbeat handles device heartbeat
 func (h *DeviceHandler) Heartbeat(c *gin.Context) {
+	userID, exists := middleware.GetUserIDFromContext(c)
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
+		return
+	}
+
 	var req dto.DeviceHeartbeatRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -72,7 +85,7 @@ func (h *DeviceHandler) Heartbeat(c *gin.Context) {
 		return
 	}
 
-	err := h.heartbeatUseCase.Execute(c.Request.Context(), req.ToEntity())
+	err := h.heartbeatUseCase.Execute(c.Request.Context(), userID, req.ToEntity())
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -85,7 +98,13 @@ func (h *DeviceHandler) Heartbeat(c *gin.Context) {
 
 // GetDevices handles listing all devices
 func (h *DeviceHandler) GetDevices(c *gin.Context) {
-	devices, err := h.listDevicesUseCase.Execute(c.Request.Context())
+	userID, exists := middleware.GetUserIDFromContext(c)
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
+		return
+	}
+
+	devices, err := h.listDevicesUseCase.Execute(c.Request.Context(), userID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -100,13 +119,19 @@ func (h *DeviceHandler) GetDevices(c *gin.Context) {
 
 // DeleteDevice handles device removal
 func (h *DeviceHandler) DeleteDevice(c *gin.Context) {
+	userID, exists := middleware.GetUserIDFromContext(c)
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
+		return
+	}
+
 	deviceID := c.Param("id")
 	if deviceID == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Device ID is required"})
 		return
 	}
 
-	err := h.deleteUseCase.Execute(c.Request.Context(), deviceID)
+	err := h.deleteUseCase.Execute(c.Request.Context(), userID, deviceID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

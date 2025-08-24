@@ -34,10 +34,10 @@ func (r *MongoFileRepository) Create(ctx context.Context, file *entities.File) (
 	return file, nil
 }
 
-func (r *MongoFileRepository) GetByID(ctx context.Context, id primitive.ObjectID) (*entities.File, error) {
+func (r *MongoFileRepository) GetByID(ctx context.Context, userID, fileID primitive.ObjectID) (*entities.File, error) {
 	var fileModel model.FileModel
 
-	err := r.collection.FindOne(ctx, bson.M{"_id": id}).Decode(&fileModel)
+	err := r.collection.FindOne(ctx, bson.M{"_id": fileID, "user_id": userID}).Decode(&fileModel)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
 			return nil, nil
@@ -48,8 +48,8 @@ func (r *MongoFileRepository) GetByID(ctx context.Context, id primitive.ObjectID
 	return fileModel.ToEntity(), nil
 }
 
-func (r *MongoFileRepository) GetAll(ctx context.Context) ([]*entities.File, error) {
-	cursor, err := r.collection.Find(ctx, bson.M{})
+func (r *MongoFileRepository) GetAllByUser(ctx context.Context, userID primitive.ObjectID) ([]*entities.File, error) {
+	cursor, err := r.collection.Find(ctx, bson.M{"user_id": userID})
 	if err != nil {
 		return nil, err
 	}
@@ -67,8 +67,8 @@ func (r *MongoFileRepository) GetAll(ctx context.Context) ([]*entities.File, err
 	return files, nil
 }
 
-func (r *MongoFileRepository) GetByDeviceID(ctx context.Context, deviceID primitive.ObjectID) ([]*entities.File, error) {
-	cursor, err := r.collection.Find(ctx, bson.M{"stored_on": deviceID})
+func (r *MongoFileRepository) GetByUserAndDeviceID(ctx context.Context, userID, deviceID primitive.ObjectID) ([]*entities.File, error) {
+	cursor, err := r.collection.Find(ctx, bson.M{"stored_on": deviceID, "user_id": userID})
 	if err != nil {
 		return nil, err
 	}
@@ -90,16 +90,16 @@ func (r *MongoFileRepository) Update(ctx context.Context, file *entities.File) e
 	fileModel := model.FromEntity(file)
 	fileModel.UpdatedAt = time.Now()
 
-	_, err := r.collection.ReplaceOne(ctx, bson.M{"_id": file.ID}, fileModel)
+	_, err := r.collection.ReplaceOne(ctx, bson.M{"_id": file.ID, "user_id": file.UserID}, fileModel)
 	return err
 }
 
-func (r *MongoFileRepository) Delete(ctx context.Context, id primitive.ObjectID) error {
-	_, err := r.collection.DeleteOne(ctx, bson.M{"_id": id})
+func (r *MongoFileRepository) Delete(ctx context.Context, userID, fileID primitive.ObjectID) error {
+	_, err := r.collection.DeleteOne(ctx, bson.M{"_id": fileID, "user_id": userID})
 	return err
 }
 
-func (r *MongoFileRepository) UpdateStatus(ctx context.Context, id primitive.ObjectID, status entities.FileStatus) error {
+func (r *MongoFileRepository) UpdateStatus(ctx context.Context, userID, fileID primitive.ObjectID, status entities.FileStatus) error {
 	update := bson.M{
 		"$set": bson.M{
 			"status":     string(status),
@@ -107,12 +107,13 @@ func (r *MongoFileRepository) UpdateStatus(ctx context.Context, id primitive.Obj
 		},
 	}
 
-	_, err := r.collection.UpdateOne(ctx, bson.M{"_id": id}, update)
+	_, err := r.collection.UpdateOne(ctx, bson.M{"_id": fileID, "user_id": userID}, update)
 	return err
 }
 
-func (r *MongoFileRepository) SearchByName(ctx context.Context, name string) ([]*entities.File, error) {
+func (r *MongoFileRepository) SearchByNameForUser(ctx context.Context, userID primitive.ObjectID, name string) ([]*entities.File, error) {
 	filter := bson.M{
+		"user_id": userID,
 		"$or": []bson.M{
 			{"name": bson.M{"$regex": name, "$options": "i"}},
 			{"original_name": bson.M{"$regex": name, "$options": "i"}},

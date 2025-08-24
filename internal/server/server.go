@@ -10,6 +10,7 @@ import (
 	searchRoutes "github.com/manab-pr/nebulo/modules/search/presentation/http/routes"
 	storageRoutes "github.com/manab-pr/nebulo/modules/storage/presentation/http/routes"
 	transferRoutes "github.com/manab-pr/nebulo/modules/transfers/presentation/http/routes"
+	userRoutes "github.com/manab-pr/nebulo/modules/users/presentation/http/routes"
 
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
@@ -54,6 +55,7 @@ func (s *Server) SetupRoutes() {
 	// API v1 routes
 	v1 := s.router.Group("/api/v1")
 	// Setup module routes
+	userRoutes.SetupUserRoutes(v1, s.container.UserHandler)
 	deviceRoutes.SetupDeviceRoutes(v1, s.container.DeviceHandler)
 	fileRoutes.SetupFileRoutes(v1, s.container.FileHandler)
 	transferRoutes.SetupTransferRoutes(v1, s.container.TransferHandler)

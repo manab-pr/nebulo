@@ -3,6 +3,7 @@ package handlers
 import (
 	"net/http"
 
+	"github.com/manab-pr/nebulo/modules/auth/middleware"
 	"github.com/manab-pr/nebulo/modules/transfers/domain/usecases"
 	"github.com/manab-pr/nebulo/modules/transfers/presentation/http/dto"
 
@@ -32,6 +33,12 @@ func NewTransferHandler(
 
 // GetPendingTransfers handles getting pending transfers for a device
 func (h *TransferHandler) GetPendingTransfers(c *gin.Context) {
+	_, exists := middleware.GetUserIDFromContext(c)
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
+		return
+	}
+
 	deviceID := c.Param("deviceId")
 	if deviceID == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Device ID is required"})
@@ -53,6 +60,12 @@ func (h *TransferHandler) GetPendingTransfers(c *gin.Context) {
 
 // CompleteTransfer handles transfer completion confirmation
 func (h *TransferHandler) CompleteTransfer(c *gin.Context) {
+	_, exists := middleware.GetUserIDFromContext(c)
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
+		return
+	}
+
 	var req dto.CompleteTransferRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -77,6 +90,12 @@ func (h *TransferHandler) CompleteTransfer(c *gin.Context) {
 
 // CancelTransfer handles transfer cancellation
 func (h *TransferHandler) CancelTransfer(c *gin.Context) {
+	_, exists := middleware.GetUserIDFromContext(c)
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
+		return
+	}
+
 	transferID := c.Param("id")
 	if transferID == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Transfer ID is required"})

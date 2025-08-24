@@ -8,6 +8,7 @@ import (
 	searchHandlers "github.com/manab-pr/nebulo/modules/search/presentation/http/handlers"
 	storageHandlers "github.com/manab-pr/nebulo/modules/storage/presentation/http/handlers"
 	transferHandlers "github.com/manab-pr/nebulo/modules/transfers/presentation/http/handlers"
+	userHandlers "github.com/manab-pr/nebulo/modules/users/presentation/http/handlers"
 
 	"github.com/go-redis/redis/v8"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -27,6 +28,7 @@ type AppContainer struct {
 	TransferHandler *transferHandlers.TransferHandler
 	StorageHandler  *storageHandlers.StorageHandler
 	SearchHandler   *searchHandlers.SearchHandler
+	UserHandler     *userHandlers.UserHandler
 }
 
 func NewAppContainer(db *mongo.Database, redis *redis.Client, cfg *config.Config, logger *zap.Logger) *AppContainer {
@@ -38,6 +40,7 @@ func NewAppContainer(db *mongo.Database, redis *redis.Client, cfg *config.Config
 	}
 
 	// Initialize repositories
+	userContainer := NewUserContainer(db)
 	deviceContainer := NewDeviceContainer(db)
 	fileContainer := NewFileContainer(db)
 	fileContainer.InitializeWithDeviceRepo(deviceContainer.Repository)
@@ -46,6 +49,7 @@ func NewAppContainer(db *mongo.Database, redis *redis.Client, cfg *config.Config
 	searchContainer := NewSearchContainer(fileContainer.Repository, deviceContainer.Repository)
 
 	// Set handlers
+	container.UserHandler = userContainer.UserHandler
 	container.DeviceHandler = deviceContainer.Handler
 	container.FileHandler = fileContainer.Handler
 	container.TransferHandler = transferContainer.Handler

@@ -10,6 +10,7 @@ import (
 
 type FileModel struct {
 	ID           primitive.ObjectID `bson:"_id,omitempty"`
+	UserID       primitive.ObjectID `bson:"user_id"`
 	Name         string             `bson:"name"`
 	OriginalName string             `bson:"original_name"`
 	Size         int64              `bson:"size"`
@@ -25,6 +26,7 @@ type FileModel struct {
 func (f *FileModel) ToEntity() *entities.File {
 	return &entities.File{
 		ID:           f.ID,
+		UserID:       f.UserID,
 		Name:         f.Name,
 		OriginalName: f.OriginalName,
 		Size:         f.Size,
@@ -41,6 +43,7 @@ func (f *FileModel) ToEntity() *entities.File {
 func FromEntity(file *entities.File) *FileModel {
 	return &FileModel{
 		ID:           file.ID,
+		UserID:       file.UserID,
 		Name:         file.Name,
 		OriginalName: file.OriginalName,
 		Size:         file.Size,
